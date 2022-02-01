@@ -6,9 +6,17 @@
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
     "@testing-library/user-event": "^13.5.0",
+    "antd": "^4.18.3",
+    "axios": "^0.24.0",
+    "clsx": "^1.1.1",
+    "dom-helpers": "^5.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "5.0.0",
+    "react-virtualized": "^9.22.3",
+    "react-virtualized-auto-sizer": "^1.0.2",
+    "react-window": "^1",
+    "react-window-infinite-loader": "^1.0.7",
     "web-vitals": "^2.1.2"
   },
   "scripts": {
