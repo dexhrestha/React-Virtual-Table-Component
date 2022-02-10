@@ -1,4 +1,4 @@
-import { useState,useCallback } from "react";
+import { useState,useCallback, useEffect } from "react";
 import {debounce, max, min, sum, transform} from "lodash";
 import Draggable from "react-draggable";
 import axios from 'axios';
@@ -61,15 +61,21 @@ let isColDragging = false;
 const VirtualTable = (props) => {
   const {dataURL,columns,fetchData} = props;
   const [data, setData] = useState({});
-  const [remoteRowCount,setRemoteRowCount] = useState(3)
+  const [remoteRowCount,setRemoteRowCount] = useState(0)
   const [loadedRows, setloadedRows] = useState([]);
   const [editCell,setEditCell] = useState({row:null,column:null})
   const defaultColWidth = Object.assign({},...columns.map(x=>({[x.name]:!!x.width?x.width:200})))
   const [colWidth,setColWidth] = useState(defaultColWidth)
+
+  useEffect(()=>{
+    updateData()
+  },[])
+
   const handleDbClick = (e,rowIndex,columnIndex)=>{
     e.preventDefault()
     setEditCell({row:rowIndex,column:columnIndex})
   }  
+  
   const resizeRow = ({columnIndex,deltaX})=>{
     headerCellcache.clearAll()
     bodyCellcache.clearAll()
@@ -205,7 +211,6 @@ const VirtualTable = (props) => {
     
     if(!!response.data){
       setRemoteRowCount(response.data.totalRowCount)
-      console.log(startIndex,stopIndex)
     response.data.data.map(e=>{
       newData[e.index]=e
     })
@@ -314,7 +319,7 @@ const VirtualTable = (props) => {
                                     backgroundColor: "grey",
                                     color: "black",
                                     height: headerCellcache.getHeight(0, 0),
-                                    width: adjustedWidth - scrollbarSize()
+                                    width: adjustedWidth
                                   }}
                                 >
                                   <Grid
@@ -328,7 +333,7 @@ const VirtualTable = (props) => {
                                     cellRenderer={headercellRenderer}
                                     rowCount={1}
                                     scrollLeft={scrollLeft}
-                                    width={adjustedWidth - scrollbarSize()}
+                                    width={adjustedWidth}
                                     deferredMeasurementCache={headerCellcache}
                                   />
                                 </div>
@@ -336,7 +341,6 @@ const VirtualTable = (props) => {
                                   style={{
                                     backgroundColor: "lightgrey",
                                     color: "black",
-                                    height,
                                     width: adjustedWidth
                                   }}
                                 >
@@ -353,6 +357,10 @@ const VirtualTable = (props) => {
                                     onScroll={handleScroll}
                                     width={adjustedWidth}
                                     onSectionRendered={onSectionRendered}
+                                    noContentRenderer={()=><div class="center">
+                                    <h3>No data currently</h3>
+                                  </div>
+                                  }
                                   />
                                 </div>
                               </div>
