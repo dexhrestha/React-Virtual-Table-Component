@@ -161,11 +161,9 @@ const VirtualTable = (props) => {
                   stopIndex:rowStopIndex
                 })
               }
-              return(
-               
+              return(               
                     <AutoSizer>
-                    {({height,width})=>(
-                                 
+                    {({height,width})=>(                                 
                       <Grid                      
                       width={width}
                       height={height}

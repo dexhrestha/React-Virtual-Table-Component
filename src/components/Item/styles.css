@@ -1,0 +1,16 @@
+div.center {
+
+    width: 30%;
+    height: 50px;
+    position: relative;
+    border-bottom: none;
+}
+
+div.center li{
+    margin: 0;
+    position: absolute;
+    top:50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%) 
+}

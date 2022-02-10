@@ -5,13 +5,10 @@ import {Layout,Menu,Breadcrumb} from 'antd';
 import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/icons';
 import Dashboard from './components/Dashboard';
 import { useState } from 'react';
-
-import ScrollSyncTable from './components/Tables/ScrollSync';
-
+import VirtualTable from './components/Tables/ScrollSync';
 
 const {SubMenu} = Menu;
 const {Header,Content,Sider}  = Layout;
-
 
 function App() {
 
@@ -72,10 +69,11 @@ function App() {
   const columns = [{'name':'Variable Name','keyVar':'col1'},{'name':'Role','keyVar':'col2'},{'name':'Type','keyVar':'col3'},{'name':'Name','keyVar':'col4'},{'name':'Name','keyVar':'col4'},{'name':'Name','keyVar':'col4'},]
 
   return (
-      <div style={{height:'700px',width:'100%'}}>
-      <ScrollSyncTable columns={columns} />
-      </div>
-   
+    // <DynamicHeightList />
+    <div>
+      <VirtualTable />
+    </div>
+      // <Cell />
   )
   return (
     <div className="App" >

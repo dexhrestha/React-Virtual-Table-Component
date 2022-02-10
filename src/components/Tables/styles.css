@@ -1,0 +1,95 @@
+.App {
+    font-family: sans-serif;
+    text-align: center;
+  }
+  
+  #example {
+    height: 500px;
+    width: 100%;
+    background-color: red;
+  }
+  
+  .container {
+    height: 500px;
+    width: 100%;
+  }
+  .GridRow {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+  }
+  .GridColumn {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+  }
+  .LeftSideGridContainer {
+    flex: 0 0 75px;
+    z-index: 10;
+  }
+  
+  .LeftSideGrid {
+    overflow: hidden !important;
+  }
+  .HeaderGrid {
+    width: 100%;
+    overflow: hidden !important;
+  }
+  .BodyGrid {
+    width: 100%;
+  }
+  
+  .evenRow {
+    background-color: "#eee";
+  }
+  .oddRow {
+    background-color: "#fff";
+  }
+  
+  .cell,
+  .headerCell,
+  .leftCell {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: row;
+    align-self: stretch;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+    padding: 2 0.5em;
+    padding-left:1em ;
+    border: 1px solid black;
+  }
+  .headerCell,
+  .leftCell {
+    font-weight: bold;
+  }
+  
+
+  
+.DragHandle {
+  flex: 0 0 16px;
+  z-index: 2;
+  cursor: col-resize;
+  color: #0085ff;
+}
+.DragHandle:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.DragHandleActive,
+.DragHandleActive:hover {
+  color: #0b6fcc;
+  z-index: 3;
+}
+
+.DragHandleIcon {
+  left: 50px;
+  flex: 0 0 12px;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
