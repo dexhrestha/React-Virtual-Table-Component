@@ -6,11 +6,11 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 reallyLongText = "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. "
-rowCount = 10000
+rowCount = 100000
 colCount = 4
 posts = [
     {'index':i,
-    'data':{f'col{j+1}':reallyLongText[:random.randint(15,int(len(reallyLongText)/2))] for j in range(colCount)}
+    'data':{j:reallyLongText[:random.randint(15,int(len(reallyLongText)/2))] for j in ["name",'email','onLeave','address']}
     }
     for i in range(rowCount)
 ]

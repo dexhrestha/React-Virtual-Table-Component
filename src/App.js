@@ -1,4 +1,4 @@
-import logo from './logo.svg';
+
 import 'antd/dist/antd.css';
 import './App.css';
 import {Layout,Menu,Breadcrumb} from 'antd';
@@ -6,6 +6,9 @@ import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/
 import Dashboard from './components/Dashboard';
 import { useState } from 'react';
 import VirtualTable from './components/Tables/ScrollSync';
+
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+import EditMenu from "./components/Input/EditMenu";
 
 const {SubMenu} = Menu;
 const {Header,Content,Sider}  = Layout;
@@ -65,13 +68,28 @@ function App() {
     },
   ]
 
-  const dataURL = ''
-  const columns = [{'name':'Variable Name','keyVar':'col1'},{'name':'Role','keyVar':'col2'},{'name':'Type','keyVar':'col3'},{'name':'Name','keyVar':'col4'},{'name':'Name','keyVar':'col4'},{'name':'Name','keyVar':'col4'},]
-
+  const dataURL = 'http://localhost:5000/data?'
+  const columns = [
+    {
+      name: "Name",
+      keyVar: "name"
+    },
+    {
+      name: "On Leave",
+      keyVar: "onLeave",
+      render: (t) => (t ? <CheckOutlined /> : <CloseOutlined />),
+      edit: (t)=><EditMenu defaultValue={t ? <CheckOutlined /> : <CloseOutlined />} options={[{key:true,value:<CheckOutlined />},{key:false,value:<CloseOutlined />},]}/>,
+      width:100
+    },
+    
+    { name: "Email", keyVar: "email" ,width:300},
+    { name: "Address", keyVar: "address"},
+      
+  ];
   return (
     // <DynamicHeightList />
-    <div>
-      <VirtualTable />
+    <div style={{width:'50%'}}>
+      <VirtualTable columns={columns} dataURL={dataURL} />
     </div>
       // <Cell />
   )

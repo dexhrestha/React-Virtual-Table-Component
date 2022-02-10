@@ -1,6 +1,7 @@
 import { useState,useCallback } from "react";
-import {debounce, max, min, sum} from "lodash";
+import {debounce, max, min, sum, transform} from "lodash";
 import Draggable from "react-draggable";
+import axios from 'axios';
 import {
   CellMeasurer,
   CellMeasurerCache,
@@ -10,13 +11,13 @@ import {
   InfiniteLoader,
   ScrollSync
 } from "react-virtualized";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+
 import "react-virtualized/styles.css"; // only needs to be imported once
 import "./styles.css";
-import faker from "faker";
+// import faker from "faker";
 import scrollbarSize from "dom-helpers/scrollbarSize";
 
-import EditMenu from "../Input/EditMenu";
+
 // In this example, average cell width is assumed to be about 100px.
 // This value will be used for the initial `Grid` layout.
 // Cell measurements smaller than 75px should also be rounded up.
@@ -37,36 +38,20 @@ const headerCellcache = new CellMeasurerCache({
 });
 const MAXCELLWIDTH = 200;
 const ROWCOUNT = 100;
-const columns = [
-  {
-    name: "Name",
-    keyVar: "name"
-  },
-  {
-    name: "On Leave",
-    keyVar: "onLeave",
-    render: (t) => (t ? <CheckOutlined /> : <CloseOutlined />),
-    edit: (t)=><EditMenu defaultValue={t ? <CheckOutlined /> : <CloseOutlined />} options={[{key:true,value:<CheckOutlined />},{key:false,value:<CloseOutlined />},]}/>,
-    width:100
-  },
-  
-  { name: "Email", keyVar: "email" ,width:300},
-  { name: "Address", keyVar: "address"},
-    
-];
-const list = [...Array(ROWCOUNT).keys()].map(() => {
-  return {
-    name: faker.name.findName(),
-    address: faker.address.city(),
-    email: faker.internet.email(),
-    onLeave: Math.random() < 0.5
-  };
-}).map(row=>{
-  return {
-    ...row,
-    onLeave : Math.random() < 0.2 ?'':true
-  }
-});
+
+// const list = [...Array(ROWCOUNT).keys()].map(() => {
+//   return {
+//     name: faker.name.findName(),
+//     address: faker.address.city(),
+//     email: faker.internet.email(),
+//     onLeave: Math.random() < 0.5
+//   };
+// }).map(row=>{
+//   return {
+//     ...row,
+//     onLeave : Math.random() < 0.2 ?'':true
+//   }
+// });
 
 
 const STATUS_LOADED = 1;
@@ -74,8 +59,9 @@ const STATUS_LOADING = 0;
 let totalWidth;
 let isColDragging = false;
 const VirtualTable = (props) => {
-  
+  const {dataURL,columns} = props;
   const [data, setData] = useState({});
+  const [remoteRowCount,setRemoteRowCount] = useState(3)
   const [loadedRows, setloadedRows] = useState([]);
   const [editCell,setEditCell] = useState({row:null,column:null})
   const defaultColWidth = Object.assign({},...columns.map(x=>({[x.name]:!!x.width?x.width:200})))
@@ -91,7 +77,6 @@ const VirtualTable = (props) => {
     const prevWidths = {...colWidth}
     const percentDelta = deltaX;
     const nextKey = !!columns[columnIndex+1]?columns[columnIndex+1]['name']:null
-    console.log(nextKey)
     // console.log(headerCellcache)
     setColWidth({
       ...colWidth,
@@ -145,9 +130,11 @@ const VirtualTable = (props) => {
 
     let content;
     const colname = columns[columnIndex]["keyVar"];
+    
     if (loadedRows[rowIndex] === STATUS_LOADED) {
-      const row = data[rowIndex];
-      if (!!row) {
+          
+      if (!!data[rowIndex]) {
+        const row = data[rowIndex].data
         const text = row[colname];
         if(editCell.row===rowIndex && editCell.column===columnIndex){
           if (!!columns[columnIndex]["edit"]){
@@ -193,11 +180,15 @@ const VirtualTable = (props) => {
           style={{
             ...style,
             backgroundColor,
-            wordWrap: "normal"
+            wordWrap: "normal",
+            maxHeight:100,
+            overflow:'hidden'
           }}
+          
           className={className}
           onDoubleClick={(e)=>handleDbClick(e,rowIndex,columnIndex)}
         >
+          
           {content}
         </div>
       </CellMeasurer>
@@ -208,20 +199,37 @@ const VirtualTable = (props) => {
     return !!loadedRows[index];
   };
 
+  async function fetchData (startIndex=0,stopIndex=30) {
+    const newData = {...data};    
+    const response = await axios.get(dataURL+`&startIndex=${startIndex}&endIndex=${stopIndex}`)
+    
+    if(!!response.data){
+      setRemoteRowCount(response.data.totalRowCount)
+     
+    response.data.data.map(e=>{
+      newData[e.index]=e
+    })
+    setData(newData)
+  }
+  }
+
   const loadMoreRows = ({ startIndex, stopIndex }) => {
-    console.log("loadmore RowS");
+    
     const loadedRowsMap = [...loadedRows];
-    const newData = [];
+   
     for (var i = startIndex; i <= stopIndex; i++) {
       loadedRowsMap[i] = STATUS_LOADING;
     }
 
-    setTimeout(() => {
-      for (var i = startIndex; i <= stopIndex; i++) {
-        newData[i] = list[i];
-      }
-      setData(newData);
-    }, 1);
+    // setTimeout(() => {
+    //   for (var i = startIndex; i <= stopIndex; i++) {
+    //     newData[i] = list[i];
+    //   }
+    //   setData(newData);
+    // }, 1);
+    
+    fetchData(startIndex,stopIndex)
+
 
     for (var i = startIndex; i <= stopIndex; i++) {
       loadedRowsMap[i] = STATUS_LOADED;
@@ -230,10 +238,10 @@ const VirtualTable = (props) => {
     setloadedRows(loadedRowsMap);
   };
 
-  const resizeGrid = ({ height, width }) => {
-    headerCellcache.clearAll();
-    bodyCellcache.clearAll();
-  };
+  // const resizeGrid = ({ height, width }) => {
+  //   headerCellcache.clearAll();
+  //   bodyCellcache.clearAll();
+  // };
 
   const getColumnWidth = (index,columnWidth)=>{
 
@@ -250,10 +258,27 @@ const VirtualTable = (props) => {
     <div className="App" onDoubleClick={e=>e.preventDefault()} onKeyDown={useCallback(debounce(e=>e.key=='Escape'?setEditCell({row:null,column:null}):console.log(e.key),1000),[])}>
       <h1>Grid with CellMeasurer Example 2</h1>
       <div className="container">
+        <div
+         style={{
+           height:100,
+           width:80,
+           backgroundColor:"#eee",
+           display:'flex',       
+            flexDirection: 'row',
+            alignItems: 'center',
+            textAlign: 'center',            
+            padding: '0.5em 0.2em',
+            overflow:'hidden'
+                }}
+         >
+            Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. 
+        </div>
         <InfiniteLoader
           isRowLoaded={isRowLoaded}
           loadMoreRows={loadMoreRows}
-          rowCount={ROWCOUNT}
+          rowCount={remoteRowCount}
+          threshold={100}
+          minimumBatchSize={500}
         >
           {({ registerChild, onRowsRendered }) => {
             const onSectionRendered = ({ rowStartIndex, rowStopIndex }) => {
@@ -263,7 +288,7 @@ const VirtualTable = (props) => {
               });
             };
             return (
-              <AutoSizer onResize={resizeGrid}>
+              <AutoSizer>
                 {({ width, height }) => (
                   <ColumnSizer
                     columnMinWidth={100}
@@ -284,6 +309,11 @@ const VirtualTable = (props) => {
                             scrollWidth
                           }) => {
                             // console.log(adjustedWidth,[...Array(columns.length).keys()].map(index=>colWidth[columns[index]['name']]))
+                            const handleScroll = (props) => {        
+                              console.log('scrolling')                      
+                              onScroll(props)
+                              bodyCellcache.clearAll()
+                            };
                             return (
                               <div className="GridColumn">
                                 <div
@@ -326,8 +356,8 @@ const VirtualTable = (props) => {
                                     cellRenderer={cellRenderer}
                                     deferredMeasurementCache={bodyCellcache}
                                     rowHeight={bodyCellcache.rowHeight}
-                                    rowCount={ROWCOUNT}
-                                    onScroll={onScroll}
+                                    rowCount={remoteRowCount}
+                                    onScroll={handleScroll}
                                     width={adjustedWidth}
                                     onSectionRendered={onSectionRendered}
                                   />
