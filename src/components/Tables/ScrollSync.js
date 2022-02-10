@@ -59,7 +59,7 @@ const STATUS_LOADING = 0;
 let totalWidth;
 let isColDragging = false;
 const VirtualTable = (props) => {
-  const {dataURL,columns} = props;
+  const {dataURL,columns,fetchData} = props;
   const [data, setData] = useState({});
   const [remoteRowCount,setRemoteRowCount] = useState(3)
   const [loadedRows, setloadedRows] = useState([]);
@@ -199,13 +199,13 @@ const VirtualTable = (props) => {
     return !!loadedRows[index];
   };
 
-  async function fetchData (startIndex=0,stopIndex=30) {
+  async function updateData(startIndex=0,stopIndex=30){
     const newData = {...data};    
-    const response = await axios.get(dataURL+`&startIndex=${startIndex}&endIndex=${stopIndex}`)
+    const response =  await fetchData(dataURL,startIndex,stopIndex)
     
     if(!!response.data){
       setRemoteRowCount(response.data.totalRowCount)
-     
+      console.log(startIndex,stopIndex)
     response.data.data.map(e=>{
       newData[e.index]=e
     })
@@ -221,14 +221,7 @@ const VirtualTable = (props) => {
       loadedRowsMap[i] = STATUS_LOADING;
     }
 
-    // setTimeout(() => {
-    //   for (var i = startIndex; i <= stopIndex; i++) {
-    //     newData[i] = list[i];
-    //   }
-    //   setData(newData);
-    // }, 1);
-    
-    fetchData(startIndex,stopIndex)
+    updateData(startIndex,stopIndex)
 
 
     for (var i = startIndex; i <= stopIndex; i++) {
@@ -255,10 +248,10 @@ const VirtualTable = (props) => {
   }
 
   return (
-    <div className="App" onDoubleClick={e=>e.preventDefault()} onKeyDown={useCallback(debounce(e=>e.key=='Escape'?setEditCell({row:null,column:null}):console.log(e.key),1000),[])}>
-      <h1>Grid with CellMeasurer Example 2</h1>
-      <div className="container">
-        <div
+    
+      
+      <div className="container"  onDoubleClick={e=>e.preventDefault()} onKeyDown={useCallback(debounce(e=>e.key=='Escape'?setEditCell({row:null,column:null}):console.log(e.key),1000),[])}>
+        {/* <div
          style={{
            height:100,
            width:80,
@@ -272,7 +265,7 @@ const VirtualTable = (props) => {
                 }}
          >
             Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. 
-        </div>
+        </div> */}
         <InfiniteLoader
           isRowLoaded={isRowLoaded}
           loadMoreRows={loadMoreRows}
@@ -310,7 +303,7 @@ const VirtualTable = (props) => {
                           }) => {
                             // console.log(adjustedWidth,[...Array(columns.length).keys()].map(index=>colWidth[columns[index]['name']]))
                             const handleScroll = (props) => {        
-                              console.log('scrolling')                      
+                                               
                               onScroll(props)
                               bodyCellcache.clearAll()
                             };
@@ -375,7 +368,7 @@ const VirtualTable = (props) => {
           }}
         </InfiniteLoader>
       </div>
-    </div>
+  
   );
 }
 

@@ -6,7 +6,7 @@ import { UserOutlined, LaptopOutlined, NotificationOutlined } from '@ant-design/
 import Dashboard from './components/Dashboard';
 import { useState } from 'react';
 import VirtualTable from './components/Tables/ScrollSync';
-
+import axios from 'axios';
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import EditMenu from "./components/Input/EditMenu";
 
@@ -86,10 +86,16 @@ function App() {
     { name: "Address", keyVar: "address"},
       
   ];
+
+  
+  function fetchData(dataURL,startIndex,stopIndex){
+     return axios.get(`${dataURL}&startIndex=${startIndex}&endIndex=${stopIndex}`)
+  }
+
   return (
     // <DynamicHeightList />
-    <div style={{width:'50%'}}>
-      <VirtualTable columns={columns} dataURL={dataURL} />
+    <div style={{width:'80%',margin: '50px'}}>
+      <VirtualTable columns={columns} dataURL={dataURL} fetchData={fetchData}/>
     </div>
       // <Cell />
   )
